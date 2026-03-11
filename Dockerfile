@@ -45,4 +45,4 @@ COPY --from=builder /app/src/generated ./src/generated
 EXPOSE 4000
 
 # 🌟 อย่าลืมเว้นวรรคตรง CMD ["sh", ... นะครับ 
-CMD ["sh", "-c", "npx prisma@latest db push && npm run start:prod"]
+CMD ["sh", "-c", "npx prisma@6 db push && npm run start:prod"]
