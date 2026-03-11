@@ -41,9 +41,9 @@ jobs:
             # -e PORT=4000 บังคับให้ NestJS รันพอร์ต 4000
             docker run -d --name ggreen-be -p 4000:4000 \
               -e PORT=4000 \
-              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-              -e JWT_EXPIRES_IN="${{ secrets.JWT_EXPIRES_IN }}" \
+              -e DATABASE_URL='${{ secrets.DATABASE_URL }}' \
+              -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
+              -e JWT_EXPIRES_IN='${{ secrets.JWT_EXPIRES_IN }}' \
               --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/ggreen-be:latest
             
             docker image prune -f
