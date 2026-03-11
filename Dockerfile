@@ -27,16 +27,15 @@ COPY prisma ./prisma/
 # 1. ลงเฉพาะ Dependencies ของ Production
 RUN npm ci --omit=dev
 
-
-# 3. ดึงไฟล์โค้ดที่ Build สำเร็จแล้วมาจากฝั่ง Builder
+# 2. ดึงไฟล์โค้ดที่ Build สำเร็จแล้วมาจากฝั่ง Builder
 COPY --from=builder /app/dist ./dist
 
-# 💡 หมายเหตุ: ผมขอคอมเมนต์บรรทัด src/generated ไว้นะครับ 
-# เพราะถ้าใน schema.prisma คุณไม่ได้ตั้งค่า output พิเศษ บรรทัดนี้จะทำให้ Docker Error ว่าหาโฟลเดอร์ไม่เจอครับ (ปกติ Prisma จะไปอยู่แค่ใน node_modules)
+# 3. ก๊อปปี้โฟลเดอร์ generated มาด้วย เพราะใน schema.prisma ตั้งค่า output แยกไว้
 COPY --from=builder /app/src/generated ./src/generated
 
 EXPOSE 4000
 
 # ใช้ && เพื่อสั่งรัน 2 คำสั่งต่อกัน 
 # npx prisma db push จะทำการสร้าง/อัปเดตตารางให้ตรงกับ schema.prisma
-CMD["sh", "-c", "npx prisma@latest db push && npm run start:prod"]
+# 🌟 แก้ไข: เว้นวรรคหลังคำว่า CMD แล้ว
+CMD ["sh", "-c", "npx prisma@latest db push && npm run start:prod"]
