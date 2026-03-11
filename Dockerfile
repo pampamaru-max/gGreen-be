@@ -15,6 +15,7 @@ COPY src ./src/
 RUN npx prisma generate
 RUN npm run build
 
+
 # ---- Production Stage ----
 FROM node:20-alpine AS production
 
@@ -23,10 +24,19 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
+# 1. ลงเฉพาะ Dependencies ของ Production
 RUN npm ci --omit=dev
 
+# 🌟 2. จุดสำคัญที่แก้ปัญหา: ต้องสั่ง Generate Prisma ในฝั่ง Prod ด้วย! 
+# (มันจะเข้าไปฝังตัวอยู่ใน node_modules อันใหม่ให้พร้อมใช้งาน)
+RUN npx prisma generate
+
+# 3. ดึงไฟล์โค้ดที่ Build สำเร็จแล้วมาจากฝั่ง Builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/generated ./src/generated
+
+# 💡 หมายเหตุ: ผมขอคอมเมนต์บรรทัด src/generated ไว้นะครับ 
+# เพราะถ้าใน schema.prisma คุณไม่ได้ตั้งค่า output พิเศษ บรรทัดนี้จะทำให้ Docker Error ว่าหาโฟลเดอร์ไม่เจอครับ (ปกติ Prisma จะไปอยู่แค่ใน node_modules)
+# COPY --from=builder /app/src/generated ./src/generated
 
 EXPOSE 4000
 
