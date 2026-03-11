@@ -40,4 +40,6 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 4000
 
-CMD ["npm", "run", "start:prod"]
+# ใช้ && เพื่อสั่งรัน 2 คำสั่งต่อกัน 
+# npx prisma db push จะทำการสร้าง/อัปเดตตารางให้ตรงกับ schema.prisma
+CMD ["sh", "-c", "npx prisma db push && npm run start:prod"]
