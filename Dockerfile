@@ -27,19 +27,16 @@ COPY prisma ./prisma/
 # 1. ลงเฉพาะ Dependencies ของ Production
 RUN npm ci --omit=dev
 
-# 🌟 2. จุดสำคัญที่แก้ปัญหา: ต้องสั่ง Generate Prisma ในฝั่ง Prod ด้วย! 
-# (มันจะเข้าไปฝังตัวอยู่ใน node_modules อันใหม่ให้พร้อมใช้งาน)
-RUN npx prisma generate
 
 # 3. ดึงไฟล์โค้ดที่ Build สำเร็จแล้วมาจากฝั่ง Builder
 COPY --from=builder /app/dist ./dist
 
 # 💡 หมายเหตุ: ผมขอคอมเมนต์บรรทัด src/generated ไว้นะครับ 
 # เพราะถ้าใน schema.prisma คุณไม่ได้ตั้งค่า output พิเศษ บรรทัดนี้จะทำให้ Docker Error ว่าหาโฟลเดอร์ไม่เจอครับ (ปกติ Prisma จะไปอยู่แค่ใน node_modules)
-# COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/src/generated ./src/generated
 
 EXPOSE 4000
 
 # ใช้ && เพื่อสั่งรัน 2 คำสั่งต่อกัน 
 # npx prisma db push จะทำการสร้าง/อัปเดตตารางให้ตรงกับ schema.prisma
-CMD ["sh", "-c", "npx prisma db push && npm run start:prod"]
+CMD["sh", "-c", "npx prisma@latest db push && npm run start:prod"]
