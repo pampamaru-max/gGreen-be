@@ -6,3 +6,4 @@ gcp_key
 gcp_key.pub
 
 /src/generated/prisma
+superbase

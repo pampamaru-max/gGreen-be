@@ -9,8 +9,10 @@ datasource db {
 }
 
 enum Role {
-  USER
+  SUPERADMIN
   ADMIN
+  EVALUATOR  // ผู้ประเมิน
+  EVALUATEE  // ผู้ถูกประเมิน
 }
 
 model User {
@@ -18,9 +20,102 @@ model User {
   email     String   @unique
   password  String
   name      String?
-  role      Role     @default(USER)
+  role      Role     @default(EVALUATEE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  maxScore  Int      @default(15)
+  sortOrder Int      @default(0)
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  topics    Topic[]
+
+  @@map("categories")
+}
+
+model Topic {
+  id         String      @id
+  categoryId Int
+  category   Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name       String
+  sortOrder  Int         @default(0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  indicators Indicator[]
+
+  @@map("topics")
+}
+
+model Indicator {
+  id                  String   @id
+  topicId             String
+  topic               Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  name                String
+  maxScore            Int      @default(4)
+  sortOrder           Int      @default(0)
+  description         String   @default("")
+  detail              String   @default("")
+  scoringCriteria     Json     @default("[]")
+  notes               String   @default("")
+  evidenceDescription String   @default("")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("indicators")
+}
+
+model ScoringLevel {
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  minScore            Decimal              @default(0) @db.Decimal(5, 2)
+  maxScore            Decimal              @default(100) @db.Decimal(5, 2)
+  color               String               @default("#22c55e")
+  icon                String               @default("trophy")
+  sortOrder           Int                  @default(0)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  certificateTemplate CertificateTemplate?
+
+  @@map("scoring_levels")
+}
+
+model CertificateTemplate {
+  id             Int           @id @default(autoincrement())
+  scoringLevelId Int?          @unique
+  scoringLevel   ScoringLevel? @relation(fields: [scoringLevelId], references: [id], onDelete: Cascade)
+  title          String        @default("ใบประกาศนียบัตร")
+  subtitle       String        @default("")
+  bodyText       String        @default("ขอมอบใบประกาศนียบัตรฉบับนี้ให้แก่")
+  footerText     String        @default("")
+  signerName     String        @default("")
+  signerTitle    String        @default("")
+  bgImageUrl     String?
+  logoUrl        String?
+  primaryColor   String        @default("#1a5632")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("certificate_templates")
+}
+
+model Program {
+  id          String   @id
+  name        String
+  description String   @default("")
+  icon        String   @default("Building2")
+  about       Json     @default("[]")
+  guidelines  Json     @default("[]")
+  reports     Json     @default("[]")
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("programs")
 }
